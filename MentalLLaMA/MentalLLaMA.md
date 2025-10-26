@@ -166,7 +166,31 @@ D = ∪𝑡=1,...,𝑁 D𝑡
 #### 6.2.2 质量
 我们采用 BART-score 评估结果来衡量解释生成的质量。在补全式方法中（见图5(a)），LLaMA2-7B 在所有10个测试集上都远超 LLaMA2-7B₍𝑍𝑆₎，显示出补全式微调在提升解释质量方面的有效性。T5 和 BART 模型生成的解释得分相近，说明它们在可解释文本生成方面能力相近。LLaMA2-7B 在10个测试集中的9个都优于 BART-large，但优势有限，仅有2个测试集（MultiWD 和 IRF）在 BART-score 上提升超过0.2。这些结果进一步证明了，对 LLaMA2 进行补全式微调并不是高效方案。基于上述观察，我们推荐使用 BART-large 来构建基于补全的可解释心理健康分析模型，因为它既具备较强能力，也具备成本优势。
 
+在图5(b)所展示的指令微调方法中，MentaLLaMA 在所有10个测试集上都远超 LLaMA2-7B 的零样本结果，显示了指令微调在提升解释质量方面的有效性。MentaLLaMA-chat-7B 也显著优于 MentaLLaMA-7B，在所有10个测试集上均有提升，其中有6个测试集的提升幅度超过0.2。这些结果证明，指令微调以及 RLHF [34] 强化训练能够显著提升 LLaMA2-chat 模型生成高质量解释的能力，相较于原始 LLaMA2 模型表现更加优秀。此外，MentaLLaMA-chat-13B 在解释质量上更进一步，在10个测试集中的8个都超过 MentaLLaMA-chat-7B 0.2分。结果显示，LLaMA-chat 能够高效利用模型规模的扩展来增强其可解释性。我们认为，RLHF 训练使得更大规模的模型能够更好地发挥其能力，生成更加符合人类偏好的解释。
 
+我们还将 MentaLLaMA 在专家编写的黄金集 G 上的生成质量与 ChatGPT 和 GPT-4 的少样本结果进行了比较。根据图5(c)的结果，MentaLLaMA 模型在大多数测试集上以远小于 ChatGPT 和 GPT-4 的模型规模，实现了与它们相当的表现，这展示了 IMHI 指令微调的有效性以及 MentaLLaMA 模型卓越的解释生成质量。同时我们注意到，GPT-4 在生成质量上并未显著优于 ChatGPT。ChatGPT 在正确性和质量方面的模型表现与 GPT-4 相当，但推理成本更低，更适合用于大规模生成响应以构建 IMHI 数据集。
+
+### 6.3 泛化能力
+
+除了卓越的生成能力之外，LLM 还被证明在未见过的任务上具有很强的泛化能力 [4, 21]。为了评估 MentaLLaMA 的泛化性，我们从 IMHI 训练集中排除了以下任务的数据：压力检测（Dreaddit）、来自 Twitter 的心理障碍检测（T-SID）、抑郁/自杀成因检测（CAMS）、以及人际风险因素检测（IRF），以构建一个新的训练集 IMHI-general。我们在 IMHI-general 上重新微调了 T5、BART 和 MentaLLaMA-chat 模型，并在这四个未见任务的测试集上对这些模型进行了评估。
+
+我们首先评估模型在正确性上的表现，相关结果见表3。如图所示，MentaLLaMA 模型在所有数据集上都显著优于 LLaMA2-13B 零样本方法，显示出 IMHI 指令微调在提升对未见心理健康分析任务的泛化能力方面的有效性。MentaLLaMA 模型还在3个数据集上超过了 ChatGPT 零样本方法，进一步证明了其在心理健康领域任务泛化方面的竞争力。
+
+在解释质量方面，BART-score 测试结果如图5(d)所示。结果显示，MentaLLaMA-chat 模型在 Dreaddit 和 CAMS 上明显优于 T5 和 BART，说明 MentaLLaMA-chat 能为基础心理健康状况/成因检测等新任务生成更高质量的解释。MentaLLaMA 在 IRF 上的优异表现也证明了其对心理健康状况背后高层次心理因素的深入理解。即使将所有 Twitter 数据从训练集中排除，MentaLLaMA-chat 仍能在 Twitter 衍生的测试集 T-SID 上取得更好成绩，证明其对具有不同数据特性的全新数据源也能很好泛化。此外，MentaLLaMA-chat-13B 在解释质量上较 MentaLLaMA-chat-7B 进一步提升，表明模型规模的扩展有助于在新任务中实现更可解释的心理健康分析。
+
+总体而言，上述分析证明了 MentaLLaMA 在未见任务中的泛化能力高于其他生成式预训练语言模型。
+
+### 6.4 人工评估
+
+虽然自动化评估结果表明解释质量很高，但BART-score在可解释心理健康分析领域仅与人工评估结果呈中等相关性，这限制了其结果的可靠性。因此，我们进一步对MentaLLaMA-chat-13B模型输出的200个随机样本进行了人工评估，评估设置与第3.3.2节相同。
+
+如图6所示，MentaLLaMA生成的解释在四个方面的平均得分均超过2.2，整体质量较高。与图4中ChatGPT的评估结果相比，MentaLLaMA在一致性和可靠性方面表现相当，证明其生成的解释能够传递关于心理健康相关推理的连贯信息，并在支持预测结果方面具有较高可信度。然而，MentaLLaMA在专业性方面明显不如ChatGPT，平均得分较低。这表明MentaLLaMA相比ChatGPT仍然缺乏领域相关知识。一个有效的解决方案是对高质量心理健康相关数据（如心理学教科书和问卷）进行持续预训练[15, 43]。
+
+### 7 结论与未来工作
+
+本文提出了新颖的可解释心理健康分析任务，并构建了首个多任务、多来源、包含10.5万条数据的IMHI数据集，用于指令微调。我们利用ChatGPT生成训练数据，并通过严格的自动化与人工评估确保其可靠性。基于IMHI数据集，我们提出了MentaLLaMA——首个具备指令遵循能力的可解释心理健康分析开源大语言模型系列。IMHI基准上的评测显示，MentaLLaMA在正确性上接近SOTA判别式方法，并能生成具有人类水平的解释文本。同时，MentaLLaMA对未见任务也展现出较高的泛化能力。
+
+在实验过程中，我们注意到MentaLLaMA在领域专业知识方面仍存在不足，相较于ChatGPT等强大模型仍有差距。未来工作中，我们将探索在大规模高质量心理健康相关数据上对MentaLLaMA进行持续预训练，以提升其解释的专业性。此外，本文采用的自动化评估指标BART-score已被证实在可解释心理健康分析领域与人工评估结果仅呈中等相关性，这限制了结论的可靠性。未来，我们将探索定制更可靠的自动化评估指标，以用于可解释心理健康分析。
 
 [6 CLPsych 2015 Shared Task: Depression and PTSD on Twitter](https://aclanthology.org/W15-1204/)
 
@@ -179,6 +203,8 @@ D = ∪𝑡=1,...,𝑁 D𝑡
 [11 CAMS: An Annotated Corpus for Causal Analysis of Mental Health Issues in Social Media Posts](https://aclanthology.org/2022.lrec-1.686/)
 
 [12 An Annotated Dataset for Explainable Interpersonal Risk Factors of Mental Disturbance in Social Media Posts](https://aclanthology.org/2023.findings-acl.757/)
+
+[15 MedAlpaca -- An Open-Source Collection of Medical Conversational AI Models and Training Data](https://arxiv.org/abs/2304.08247)
 
 [18 Suicidal Ideation and Mental Disorder Detection with Attentive Relation Networks](https://arxiv.org/abs/2004.07601)
 
@@ -201,6 +227,8 @@ D = ∪𝑡=1,...,𝑁 D𝑡
 [41 Self-Instruct: Aligning Language Models with Self-Generated Instructions](https://aclanthology.org/2023.acl-long.754/)
 
 [42 Emergent Abilities of Large Language Models](https://arxiv.org/abs/2206.07682)
+
+[43 PIXIU: A Large Language Model, Instruction Data and Evaluation Benchmark for Finance](https://arxiv.org/abs/2306.05443)
 
 [45 Towards Interpretable Mental Health Analysis with Large Language Models](https://aclanthology.org/2023.emnlp-main.370/)
 
